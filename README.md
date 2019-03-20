@@ -6,6 +6,7 @@ Data Science final project, COSC 481 Spring 2019
 - Olivia Lyons
 - Destiny Adams (Organizer)
 - Hannah Roe
+- Harrison Ratcliffe
 
 ## Purpose
 This major project in data science is about two things: executing a full data science study,
@@ -48,13 +49,13 @@ your team’s process. The first page of this is your justification paper, but t
 parts of the paper should include information about: how your approach or the question is
 unique; what data and conclusions are already available; how the data has been altered
 (cleaned); what inferences you were able to make during the data analysis portion of the
-project; what successes and failures you had during the model creation process; what 
+project; what successes and failures you had during the model creation process; what
 conclusions you are able to make in reference to your question; and what future work is
 available in further exploration of your question. Including appropriate diagrams of
 appropriate size (but not including any significant amount of code, or the required
 bibliography, title, and abstract), this should be at least 10 pages, single-spaced with 1”
 margins, 12pt Times New Roman font, no excessive spacing, and you should have at
-least 10 in-line cited sources. You may use MLA, Chicago, or AMS citation styles. 
+least 10 in-line cited sources. You may use MLA, Chicago, or AMS citation styles.
 
 ### Presentation
 During the final class you and your team will be giving a professional, 20 minute
@@ -70,13 +71,13 @@ Presentations will be evaluated by the instructor and the class. You will be eva
 clarity, content, ability to answer questions, presentation ability (this includes being able
 to deliver a clean, well-rehearsed lecture, with appropriate body language, and no
 technical hiccups), and professional appearance (both attire and slides). After the
-presentation, there will be a 5-minute Q&A session. 
+presentation, there will be a 5-minute Q&A session.
 
 ## Due Dates
 All team submission emails should come from the team leads.
 Be very careful to pay attention to all deadlines noted below. **There will be no allowances
-for late turnins, including slip days.** 
-- [x] 3/21, 5pm - Link to the github page for your project via email 
+for late turnins, including slip days.**
+- [x] 3/21, 5pm - Link to the github page for your project via email
 - [ ] 3/28, 5pm – Selection notification of data set(s) via email
 - [ ] 4/7, 5pm – Selection of question to be answered, justification paper via email
 - [ ] 4/24, 5pm – Final clone of the github repository for all code and the final paper
