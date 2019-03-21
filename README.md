@@ -78,7 +78,7 @@ All team submission emails should come from the team leads.
 Be very careful to pay attention to all deadlines noted below. **There will be no allowances
 for late turnins, including slip days.**
 - [x] 3/21, 5pm - Link to the github page for your project via email
-- [ ] 3/28, 5pm – Selection notification of data set(s) via email
+- [x] 3/28, 5pm – Selection notification of data set(s) via email
 - [ ] 4/7, 5pm – Selection of question to be answered, justification paper via email
 - [ ] 4/24, 5pm – Final clone of the github repository for all code and the final paper
 - [ ] 4/24, 5pm – Link for the clean dataset(s) via email or dataset available via github
