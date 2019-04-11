@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[12]:
+# In[3]:
 
 
 import numpy as np
@@ -14,6 +14,7 @@ csvFile = open('professionalsCLEAN.csv','a')
 
 #opens writer
 csvWriter = csv.writer(csvFile)
+file = open("deletedProfessionalsID.txt","w")
 
 #creates new row with the needed column titles
 csvWriter.writerow(['professionals_id', 'professionals_location', 'professionals_industry', 'professionals_headline', 'professionals_date_joined'])
@@ -40,8 +41,12 @@ for i in range(len(data)):
         
         #writes as new row within the professionalsCLEAN.csv
         csvWriter.writerow(newInfo)
-        
+    else:
+        newInfo = data.loc[i]
+        file.write(newInfo['professionals_id'])
+        file.write("\n")
 #closes the file reader
 print("done")
 csvFile.close()
+file.close()
 
