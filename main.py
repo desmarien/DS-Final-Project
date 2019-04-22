@@ -9,8 +9,12 @@ import csv
 
 #DATA CLEANING
 
-# clean out questions.csv to only include: id, question title, question body
+#initialize dataframes
+professionals_df = pd.read_csv("Final Project Data/professionals.csv")
 questions_df = pd.read_csv("Final Project Data/questions.csv")
+answers_df = pd.read_csv("Final Project Data/answers.csv")
+
+# clean out questions.csv to only include: id, question title, question body
 questions_df = questions_df[['questions_id', 'questions_title', 'questions_body']]
 
 # function to perform keyword rake on a given df with the name of the column and name of new column created with keywords
@@ -27,12 +31,11 @@ def getKeywords(df, column_name, new_column_name):
         keywords_scores = r.get_word_degrees()
         # assigning the key words to the new column
         row[new_column_name] = list(keywords_scores.keys())
-
 #get keywords for title and question body        
 getKeywords(questions_df, 'questions_title', 'questions_keywords')
 getKeywords(questions_df, 'questions_body', 'questions_body_keywords')
 
-#also we need to get rid of the questions_body column, since we don't need it anymore
+#get rid of the questions_body column, since we don't need it anymore
 questions_df.drop(columns = ['questions_body'], inplace = True)
 
 # set the indexes of the dataframe as the question ids instead of integers, that way we can just pull the id if needed
@@ -42,7 +45,7 @@ questions_df.set_index('questions_id', inplace = True)
 questions_df['KeyWords'] = '' #NEW column of ALL keywords we just extracted from question title and body
 columns = questions_df.columns
 for index, row in questions_df.iterrows():
-    #put together a word string from the lists of keywords in the columns we made, avoiding the title columns we want to keep
+    #put together a word string from the lists of keywords in the columns we made, avoiding the question title
     word_string = ''
     for col in columns:
         if col != 'questions_title':
@@ -51,14 +54,45 @@ for index, row in questions_df.iterrows():
     
 #get rid of the original two keywords columns since we combined them
 questions_df.drop(columns = ['questions_keywords', 'questions_body_keywords'], inplace = True)
+#testing changes, create a csv of dataframe
+questions_df.to_csv('Final Project Data\questionsKeywords.csv')
 
-# TO DO: delete pros that have not answered any questions
+#drop everything from professionals df other than id, since they're not needed
+professionals_df.drop(columns = ['professionals_location', 'professionals_industry', 'professionals_date_joined',
+                                'professionals_headline'], inplace = True)
+# delete pros that have not answered any questions
 # gather id #s of questions that have already been answered by each professional (might need to be excluded later??)
-answers_df = pd.read_csv("Final Project Data/answers.csv")
-professionals_df = pd.read_csv("Final Project Data/professionals.csv")
 
-#CALCULATE SIMILARITY
-# CountVectorizer performs a frequency count, we're going to use it on the combined question data + turn it into a matrix
-# generate a cosine similarity matrix - very similar to the correlation heat maps we've done previously
+#only need author id and matching question id from answers
+answers_df.drop(columns = ['answers_date_added', 'answers_body'], inplace = True)
+#set df indexes to answers_id
+answers_df.set_index('answers_id', inplace = True)
 
-#PROGRAM I/O - enter a pro id at random and result should be 10 recommended questions
+#deleting pros that haven't answered any questions (AKA doesn't appear in answers_df)
+for x in professionals_df['professionals_id']:
+    #counts the number of times a pro id appears in the answers df
+    pro_count = ((answers_df.answers_author_id == x).sum())
+    #if pro id does not exist in answers df, delete it from professionals
+    if(pro_count) == 0:
+        #basically recreate the dataframe, excluding the row with the professional that hasn't answered questions
+        professionals_df = professionals_df[professionals_df.professionals_id != x]
+#now that we have the shortened list of professionals, gather the question id's that were answered by each pro
+# within the answers df... then grab the question data corresponding to the ids
+professionals_df['answered_questions'] = ''
+for y in professionals_df['professionals_id']:
+    #find all indexes where the pro id occurs within the answers df
+    location_list = answers_df.answers_author_id[answers_df.answers_author_id == y].index.tolist()
+    #use those indexes to get question id's from answers df
+    question_list = []
+    for loc in location_list:
+        question_list.append(answers_df.answers_question_id[loc])
+    #with the question id's, gather all the question keywords into a single word string and throw it into the new
+    # column in professionals
+    all_keywords_string = ""
+    for q in question_list:
+        all_keywords_string = all_keywords_string + questions_df.KeyWords[q]
+        professionals_df.answered_questions[professionals_df.professionals_id == y] = all_keywords_string
+    #now that we have the keywords, we want to set pro id as index for later searches
+professionals_df.set_index('professionals_id', inplace = True)
+# convert professionals df to csv so we can read it for testing
+professionals_df.to_csv('Final Project Data\professionalsKeywords.csv')
