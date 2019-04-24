@@ -178,8 +178,9 @@ def getRecommendations(topTen):
 
 
 pro_id = input("enter a professional id# (just press return for a default ID for testing): ")
-if pro_id is None or pro_id = '':
+if pro_id is None or pro_id == '':
     pro_id = '57a497a3dd214fe6880816c376211ddb'
+print() #make a new line
 search_questions = professionals_df.at[pro_id, 'answered_questions']
 results = top10(search_questions, cosine_sim)
 qs = getRecommendations(results) #lookup the questions
