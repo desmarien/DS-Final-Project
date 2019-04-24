@@ -7,6 +7,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer
 import csv
 import re
+from collections import Counter
 
 #DATA CLEANING
 
@@ -92,10 +93,54 @@ for y in professionals_df['professionals_id']:
     question_list = []
     for loc in location_list:
         question_list.append(answers_df.answers_question_id[loc])
-    index = professionals_df.index[professionals_df['professionals_id'] == y][0] # get row numeric index based on the professionals id
-    professionals_df.at[index, 'answered_questions'] = question_list # add the professionals list of questions to professionals dataframe
+    # get row numeric index based on the professionals id
+    index = professionals_df.index[professionals_df['professionals_id'] == y][0]
+    # add the professionals list of questions to professionals dataframe
+    professionals_df.at[index, 'answered_questions'] = question_list
     
 #now that we have the keywords, we want to set pro id as index for later searches
 professionals_df.set_index('professionals_id', inplace = True)
 # convert professionals df to csv so we can read it for testing
 professionals_df.to_csv('Final Project Data\professionalsKeywords.csv')
+
+#countvectorizer will count frequency of each word in the question keywords for the whole column of keywords 
+count = CountVectorizer()
+count_matrix = count.fit_transform(questions_df['KeyWords'])
+# generating the cosine similarity matrix of the keyword frequency
+cosine_sim = cosine_similarity(count_matrix, count_matrix)
+#in theory, this should generate a comparison of all questions to each other, and look similar to the heat maps we did
+# in class
+
+#generating the top 10 results!
+
+#associate the question_id's to a numerical index used for navigating the cosine matrix
+indices = pd.Series(questions_df.index)
+
+#returns a list of top 10 recommended question id's and similarity scores...
+# written as a function so that when a professional has more than one question, we can run this for each question_id
+# and then gather the top 10 results from the mega-list of questions and scores. This way we account for similarity
+# to all the questions previously answered by the professional.
+def top10(question_ids, cosine_sim):
+    #new list for storing ids and scores
+    recommended_questions_dict = {}
+    #create a dictionary of question ids and sim scores, containing top 10 sim scores for each question i
+    for i in question_ids:
+        #get matrix index of question_id i
+        index = indices[indices == i].index[0]
+        #create a series of all scores, sort from highest to lowest
+        sim_scores = pd.Series(cosine_sim[index]).sort_values(ascending = False)
+        #get the scores AND the index in the matrix of the top 10 scores for question i
+        top_scores = list(sim_scores.iloc[1:11])
+        top_indices = list(sim_scores.iloc[1:11].index)
+        #get the question_ids of top ten scores for question i
+        for i in range(len(top_indices)):
+            #saves question id as a key to the score
+            recommended_questions_dict[(questions_df.index)[top_indices[i]]] = top_scores[i]
+    top_10_recs = dict(Counter(results).most_common(10))
+    return list(top_10_recs.keys())
+
+#OUTPUT/Results
+pro_id = input("enter a professional id#: ")
+search_questions = professionals_df.at[pro_id, 'answered_questions']
+results = top10(search_questions, cosine_sim)
+print(results)
