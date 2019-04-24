@@ -99,3 +99,10 @@ for y in professionals_df['professionals_id']:
 professionals_df.set_index('professionals_id', inplace = True)
 # convert professionals df to csv so we can read it for testing
 professionals_df.to_csv('Final Project Data\professionalsKeywords.csv')
+
+#countvectorizer will count frequency of each word in the question keywords for the whole column of keywords 
+count = CountVectorizer()
+count_matrix = count.fit_transform(questions_df['KeyWords'])
+# generating the cosine similarity matrix of the keyword frequency
+cosine_sim = cosine_similarity(count_matrix, count_matrix)
+#this should generate a comparison of all questions to each other, and look similar to the heat maps we did in class
