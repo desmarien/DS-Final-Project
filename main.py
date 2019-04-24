@@ -108,8 +108,8 @@ count = CountVectorizer()
 count_matrix = count.fit_transform(questions_df['KeyWords'])
 # generating the cosine similarity matrix of the keyword frequency
 cosine_sim = cosine_similarity(count_matrix, count_matrix)
-#in theory, this should generate a comparison of all questions to each other, and look similar to the heat maps we did
-# in class
+
+#this should generate a comparison of all questions to each other, and look similar to the heat maps we did in class
 
 #generating the top 10 results!
 
@@ -143,4 +143,5 @@ def top10(question_ids, cosine_sim):
 pro_id = input("enter a professional id#: ")
 search_questions = professionals_df.at[pro_id, 'answered_questions']
 results = top10(search_questions, cosine_sim)
+
 print(results)
