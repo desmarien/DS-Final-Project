@@ -1,5 +1,6 @@
 #content based recommender system for Kaggle Challenge
 #goal: match professionals with career questions from students to answer
+print('Importing...', end='')
 import pandas as pd
 from rake_nltk import Rake #https://pypi.org/project/rake-nltk/
 import numpy as np
@@ -9,12 +10,14 @@ import csv
 import re
 from collections import Counter
 
+print('...done!')
 #DATA CLEANING
+print('Performing data cleaning...(this might take a few minutes)...',end='')
 
 #initialize dataframes
-professionals_df = pd.read_csv("Final Project Data/professionals.csv")
-questions_df = pd.read_csv("Final Project Data/questions.csv")
-answers_df = pd.read_csv("Final Project Data/answers.csv")
+professionals_df = pd.read_csv("professionals.csv")
+questions_df = pd.read_csv("questions.csv")
+answers_df = pd.read_csv("answers.csv")
 
 # clean out questions.csv to only include: id, question title, question body
 questions_df = questions_df[['questions_id', 'questions_title', 'questions_body']]
@@ -61,12 +64,13 @@ for i in range(len(questions_df)):
 #get rid of the original two keywords columns since we combined them
 questions_df.drop(columns = ['questions_keywords', 'questions_body_keywords'], inplace = True)
 #create a csv of the new, clean dataframe
-questions_df.to_csv('Final Project Data\questionsKeywords.csv')
+questions_df.to_csv('questionsKeywords.csv')
 
 #drop everything from professionals df other than id, since they're not needed
 professionals_df.drop(columns = ['professionals_location', 'professionals_industry', 'professionals_date_joined',
                                 'professionals_headline'], inplace = True)
 
+print('...pruning extra professionals...',end='')
 # delete pros that have not answered any questions
 # gather id #s of questions that have already been answered by each professional (might need to be excluded later??)
 #only need author id and matching question id from answers
@@ -82,6 +86,9 @@ for x in professionals_df['professionals_id']:
     if(pro_count) == 0:
         #basically recreate the dataframe, excluding the row with the professional that hasn't answered questions
         professionals_df = professionals_df[professionals_df.professionals_id != x]
+
+print('.done!')
+print('generating keywords...',end='')
 
 #now that we have the shortened list of professionals, gather the question id's that were answered by each pro
 # within the answers df... then grab the question data corresponding to the ids
@@ -101,14 +108,20 @@ for y in professionals_df['professionals_id']:
 #now that we have the keywords, we want to set pro id as index for later searches
 professionals_df.set_index('professionals_id', inplace = True)
 # convert professionals df to csv so we can read it for testing
-professionals_df.to_csv('Final Project Data\professionalsKeywords.csv')
-
+professionals_df.to_csv('professionalsKeywords.csv')
+print('...done!')
+#countvectorizer will count frequency of each word in the question keywords for the whole column of keywords 
+print('Beginning count vectorizer...',end='')
 #countvectorizer will count frequency of each word in the question keywords for the whole column of keywords 
 count = CountVectorizer()
+print('...done!')
+print('Now creating count matrix...',end='')
 count_matrix = count.fit_transform(questions_df['KeyWords'])
 # generating the cosine similarity matrix of the keyword frequency
+print('...done!')
+print('Now creating cosine similarity matrix...',end='')
 cosine_sim = cosine_similarity(count_matrix, count_matrix)
-
+print('...done!')
 #this should generate a comparison of all questions to each other, and look similar to the heat maps we did in class
 
 #generating the top 10 results!
@@ -136,12 +149,43 @@ def top10(question_ids, cosine_sim):
         for i in range(len(top_indices)):
             #saves question id as a key to the score
             recommended_questions_dict[(questions_df.index)[top_indices[i]]] = top_scores[i]
-    top_10_recs = dict(Counter(results).most_common(10))
+    top_10_recs = dict(Counter(recommended_questions_dict).most_common(10))
     return list(top_10_recs.keys())
 
-#OUTPUT/Results
-pro_id = input("enter a professional id#: ")
+#topTen is a list of ten IDs as strings
+def getRecommendations(topTen):
+       
+    #All Questions, for lookup purposes
+    questions = pd.read_csv('questions.csv')
+    
+    
+    #dataframe to hold ID & title for convenience. empty now
+    result = pd.DataFrame(columns=['question_id','question_title'])
+    
+    j = 0
+    for i in topTen:
+        #This just grabs title into temp
+        title = questions.loc[questions['questions_id'] == i, 'questions_title'].iloc[0]
+        
+        #This should just append a row that looks like ['bd7dfb3f', 'How do i make my teacher think im a mermaid']
+        result.loc[j] = [i,title]
+        j+= 1
+        
+    #Reset index real quick and move on
+    result.set_index('question_id', inplace=True)
+    
+    return result
+
+
+pro_id = input("enter a professional id# (just press return for a default ID for testing): ")
+if pro_id is None or pro_id = '':
+    pro_id = '57a497a3dd214fe6880816c376211ddb'
 search_questions = professionals_df.at[pro_id, 'answered_questions']
 results = top10(search_questions, cosine_sim)
+qs = getRecommendations(results) #lookup the questions
+print('10 questions to recommend to this professional:')
+for q in qs.iterrows():
+    #q will be a tuple of values (question_id, question_text)
+    print(q[1][0])
 
-print(results)
+#print(results)
